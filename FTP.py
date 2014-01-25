@@ -17,19 +17,69 @@ def upload(ftp, local_root, files):
     for file_name in files:
         local_path = os.path.join(local_root, file_name).replace("/", "\\")
         remote_path = os.path.join(REMOTE_ROOT, file_name).replace("\\", "/")
-        print "Uploading %s to %s" % (local_path, remote_path)
-        with open(local_path, "rb") as local_file:
-            ftp.storbinary("STOR %s" % remote_path, local_file)
+        if (os.path.isdir(local_path)):
+            # Create the folder on the server
+            print "Creating folder %s" % remote_path
+            ftp.mkd(remote_path)
+        else:
+            # It's a file, upload it
+            print "Uploading %s to %s" % (local_path, remote_path)
+            with open(local_path, "rb") as local_file:
+                ftp.storbinary("STOR %s" % remote_path, local_file)
+
+def recursive_delete_files(ftp):
+    # WARNING: Very dangerous. Deletes all the files within the cwd of ftp
+    files = ftp.nlst()
+    for file in files:
+        if file == "." or file == "..":
+            continue
+
+        if "." in ftp.nlst(file):
+            # Folder, recurse
+            print "Going into folder %s" % file
+            ftp.cwd(file)
+            recursive_delete_files(ftp)
+            ftp.cwd("..")
+            # Now delete the folder
+            print "Deleting folder %s" % file
+            ftp.rmd(file)
+        else:
+            print "Deleting file %s" % file
+            ftp.delete(file)
 
 def delete(ftp, files):
-    for file_name in files:
-        print "Deleting %s from server" % file_name
+    cwd = ftp.pwd()
+    folder_names = []
+    file_names   = []
+    
+    for file in files:
+        if file.endswith("/"):
+            folder_names.append(file)
+        else:
+            file_names.append(file)
+
+    # First delete the files
+    for file_name in file_names:
         remote_path = os.path.join(REMOTE_ROOT, file_name).replace("\\", "/")
+        print "Deleting file %s from server" % file_name
         ftp.delete(remote_path)
 
+    # Then delete the folders
+    for folder_name in folder_names:
+        remote_path = os.path.join(REMOTE_ROOT, folder_name).replace("\\", "/")
+        print "Deleting folder %s and all its contents from server" % folder_name
+        ftp.cwd(remote_path)
+        # First delete the folders contents
+        recursive_delete_files(ftp)
+        # Then delete the folder itself
+        ftp.cwd(cwd)    # Go back to root directory
+        ftp.rmd(remote_path)
+
 if __name__ == "__main__":
-    # Args: REPO REV LOCAL_REPO FTPUser FTPPass
     repo, rev = sys.argv[1:]
+	
+    if repo == "" or rev == "":
+        raise Exception("Empty repo or rev")
     
     with open("E:\website.txt", "r") as settings:
         local       = settings.readline().rstrip()
@@ -65,7 +115,7 @@ if __name__ == "__main__":
     print
     print "Deleting files"
     print "=============="
-    #delete(ftp, deleted)
+    delete(ftp, deleted)
     
     print
     print "Updating files"
