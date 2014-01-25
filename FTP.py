@@ -12,6 +12,7 @@ ADDED           = "A   "
 DELETED         = "D   "
 UPDATED         = "U   "
 OFFSET          = len(ADDED) + len(TRUNK)
+SETTINGS_FILE   = "E:\website.txt"
 
 def upload(ftp, local_root, files):
     for file_name in files:
@@ -81,7 +82,7 @@ if __name__ == "__main__":
     if repo == "" or rev == "":
         raise Exception("Empty repo or rev")
     
-    with open("E:\website.txt", "r") as settings:
+    with open(SETTINGS_FILE, "r") as settings:
         local       = settings.readline().rstrip()
         ftp_server  = settings.readline().rstrip()
         user        = settings.readline().rstrip()
