@@ -4,15 +4,17 @@ Created on 2012-08-26
 @author: robbie
 '''
 from ftplib import FTP
-import os, sys, subprocess
+import os, sys, subprocess, getpass
 
-REMOTE_ROOT     = "./"          # Changed in settings file
 TRUNK           = "trunk/"
 ADDED           = "A   "
 DELETED         = "D   "
 UPDATED         = "U   "
 OFFSET          = len(ADDED) + len(TRUNK)
-SETTINGS_FILE   = "E:\website.txt"
+
+LOCAL       = "C:\\My Site"
+FTP_SERVER  = "mysite.example.com"
+REMOTE_ROOT = "public_html/"
 
 def upload(ftp, local_root, files):
     for file_name in files:
@@ -82,14 +84,10 @@ if __name__ == "__main__":
     if repo == "" or rev == "":
         raise Exception("Empty repo or rev")
     
-    with open(SETTINGS_FILE, "r") as settings:
-        local       = settings.readline().rstrip()
-        ftp_server  = settings.readline().rstrip()
-        user        = settings.readline().rstrip()
-        password    = settings.readline().rstrip()
-        REMOTE_ROOT = settings.readline().rstrip()
+    user = raw_input("Please enter your ftp username: ")
+    password = getpass.getpass()
 
-    local_root = os.path.join(local, TRUNK)
+    local_root = os.path.join(LOCAL, TRUNK)
     
     # Take SVN changed output and convert it to a list of Added/Deleted/Modified
     changed = subprocess.check_output(["svnlook", "changed", "-r", rev, repo]).split("\r\n")[:-1]
@@ -106,7 +104,7 @@ if __name__ == "__main__":
         elif change.startswith(UPDATED):
             updated.append(file_name)
 
-    ftp = FTP(ftp_server)
+    ftp = FTP(FTP_SERVER)
     ftp.login(user, password)
     
     print "Adding new files to FTP"
