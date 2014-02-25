@@ -13,7 +13,7 @@ any file or folder that was removed from the SVN repo. The script runs when a co
 This script is very simple to install.
 
 1. Copy post-commit.bat and FTP.py to your svn\hooks\ folder.
-2. Modify the following varaibles in FTP.py
+2. Modify the following variables in FTP.py
  - LOCAL        - The full path location to the local SVN repo
  - FTP_SERVER   - The full URL to the FTP server
  - REMOTE_ROOT  - The root directory to upload the repo to
