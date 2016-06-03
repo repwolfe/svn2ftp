@@ -1,0 +1,4 @@
+# List file names and folder names to ignore from uploading through FTP
+# Folder names end with a /
+# Comments begin with a #
+.svnignore
