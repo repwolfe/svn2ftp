@@ -27,7 +27,7 @@ Files or folders listed in this file will be ignored. Each new file or folder sh
 be on its own line and spelled correctly. All files or folders should be written 
 relative to the folder containing the svnignore file. Files should include their extension. 
 Folders are indicated with a / at the end of the name. You can add comments by 
-starting the line with a #. The ignore file itself is automatically ignored.
+starting the line with a #.
 
 ## TODO
 - Modify post-commit.bat so the command prompt closes automatically
